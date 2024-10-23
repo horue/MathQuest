@@ -19,6 +19,7 @@ public class Jogo extends JFrame {
     private Timer jogoTimer;
     private int tempoRestante;
     private Font customFont;
+    private Font numberFont;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Jogo().iniciar());
@@ -40,6 +41,7 @@ public class Jogo extends JFrame {
     public void iniciar() {
         try {
             customFont = Font.createFont(Font.TRUETYPE_FONT, new File("Font\\SuperFunky-lgmWw.ttf")).deriveFont(14f);
+            numberFont = Font.createFont(Font.TRUETYPE_FONT, new File("Font\\MouldyCheeseRegular-WyMWG.ttf")).deriveFont(14f); // Fonte para números
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(customFont);
         } catch (FontFormatException | IOException e) {
@@ -59,7 +61,7 @@ public class Jogo extends JFrame {
     public void iniciarJogo() {
         gerarNovaConta(); // Gera a primeira conta imediatamente
         telaJogo.atualizarTela(); // Atualiza a tela para mostrar a conta
-        tempoRestante = 20;
+        tempoRestante = 35;
         telaJogo.atualizarTempo(tempoRestante);
     
         jogoTimer = new Timer(1000, new ActionListener() {
@@ -134,9 +136,9 @@ public class Jogo extends JFrame {
         public void responder(int resposta, Conta conta) {
             if (conta.verificarResposta(resposta)) {
                 incrementarPontuacao(conta);
-                tempoRestante += 3; // Adiciona tempo se acertar (PODE SER ALTERADO)
+                tempoRestante += 4; // Adiciona tempo se acertar (PODE SER ALTERADO)
             } else {
-                tempoRestante -= 4; // Reduz o tempo se errar (PODE SER ALTERADO)
+                tempoRestante -= 2; // Reduz o tempo se errar (PODE SER ALTERADO)
             }
         }
 
