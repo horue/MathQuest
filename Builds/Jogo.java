@@ -23,7 +23,7 @@ public class Jogo extends JFrame {
 
     public void iniciar() {
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("SuperFunky-lgmWw.ttf")).deriveFont(14f);
+            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("Font\\SuperFunky-lgmWw.ttf")).deriveFont(14f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(customFont);
         } catch (FontFormatException | IOException e) {
