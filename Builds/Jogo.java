@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Jogo extends JFrame {
     private Jogador jogador;
@@ -19,6 +22,19 @@ public class Jogo extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Jogo().iniciar());
+    }
+
+
+    public void tocarMusicaFundo() {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets\\m1.wav"));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.loop(Clip.LOOP_CONTINUOUSLY); // Repetir a música continuamente
+            clip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void iniciar() {
@@ -36,7 +52,9 @@ public class Jogo extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 400);
         setVisible(true);
+        tocarMusicaFundo();
     }
+
 
     public void iniciarJogo() {
         gerarNovaConta(); // Gera a primeira conta imediatamente
@@ -97,7 +115,7 @@ public class Jogo extends JFrame {
             }
         });
 
-        // Exibe o placar em um JOptionPane
+        // Exibe o placar em um JOptionPane (AINDA VOU MUDAR)
         StringBuilder placarTexto = new StringBuilder("Placar:\n");
         for (String p : placar) {
             placarTexto.append(p).append("\n");
@@ -116,9 +134,9 @@ public class Jogo extends JFrame {
         public void responder(int resposta, Conta conta) {
             if (conta.verificarResposta(resposta)) {
                 incrementarPontuacao(conta);
-                tempoRestante += 3; // Adiciona tempo se acertar
+                tempoRestante += 3; // Adiciona tempo se acertar (PODE SER ALTERADO)
             } else {
-                tempoRestante -= 4; // Reduz o tempo se errar
+                tempoRestante -= 4; // Reduz o tempo se errar (PODE SER ALTERADO)
             }
         }
 
@@ -263,14 +281,20 @@ public class Jogo extends JFrame {
 
         public void exibirTelaFimDeJogo() {
             String nome = JOptionPane.showInputDialog(this, "Fim de Jogo! Digite seu nome:");
+            
+            // Verifica se o nome é nulo ou vazio
+            while (nome == null || nome.trim().isEmpty()) {
+                nome = JOptionPane.showInputDialog(this, "Nome não pode ser vazio! Por favor, digite seu nome:");
+            }
+            
             jogo.jogador.setNome(nome);
             System.out.println("Jogador: " + jogo.jogador.getNome() + " - Pontuação: " + jogo.jogador.getPontuacao());
-
+        
             jogo.registrarPontuacao(); // Salva a pontuação do jogador
-
+        
             int option = JOptionPane.showConfirmDialog(this, "Deseja jogar novamente?", "Fim de Jogo", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
-                jogo.iniciar(); // Reinicia o jogo
+                jogo.iniciar();
             } else {
                 System.exit(0);
             }
@@ -288,8 +312,8 @@ public class Jogo extends JFrame {
 
         public void gerarConta() {
             Random random = new Random();
-            numero1 = random.nextInt(10) + 1; // Gera um número entre 1 e 10
-            numero2 = random.nextInt(10) + 1; // Gera um número entre 1 e 10
+            numero1 = random.nextInt(19) + 1; 
+            numero2 = random.nextInt(19) + 1; // Gera núemro entre 1 e 19
         
             char[] operadores = {'+', '-', '*', '/'};
             operador = operadores[random.nextInt(4)];
