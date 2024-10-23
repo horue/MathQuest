@@ -177,7 +177,7 @@ public class Jogo extends JFrame {
             gbc.insets = new Insets(10, 10, 10, 10); // Espaçamento entre os componentes
 
             lblConta = new JLabel();
-            lblConta.setFont(jogo.customFont.deriveFont(40f)); // Aumenta o tamanho da fonte da conta
+            lblConta.setFont(jogo.numberFont.deriveFont(40f)); // Aumenta o tamanho da fonte da conta
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.gridwidth = 2;
@@ -266,6 +266,7 @@ public class Jogo extends JFrame {
 
         public void atualizarTela() {
             lblConta.setText(jogo.contaAtual.toString());
+            lblConta.setFont(numberFont.deriveFont(30f));
             lblPontuacao.setText("Pontuação: " + jogo.jogador.getPontuacao());
         }
 
@@ -317,7 +318,7 @@ public class Jogo extends JFrame {
             numero1 = random.nextInt(19) + 1; 
             numero2 = random.nextInt(19) + 1; // Gera núemro entre 1 e 19
         
-            char[] operadores = {'+', '-', '*', '/'};
+            char[] operadores = {'+', '-', 'x', '÷'};
             operador = operadores[random.nextInt(4)];
         
             // Ajustes para subtração e divisão
@@ -327,7 +328,7 @@ public class Jogo extends JFrame {
                     numero1 = numero2;
                     numero2 = temp;
                 }
-            } else if (operador == '/') {
+            } else if (operador == '÷') {
                 // Garantir que a divisão seja exata
                 numero1 = random.nextInt(9) + 1; // Gera um número entre 1 e 9
                 numero2 = random.nextInt(9) + 1; // Gera um número entre 1 e 9
@@ -345,10 +346,10 @@ public class Jogo extends JFrame {
                 case '-':
                     resultado = numero1 - numero2;
                     break;
-                case '*':
+                case 'x':
                     resultado = numero1 * numero2;
                     break;
-                case '/':
+                case '÷':
                     resultado = numero1 / numero2;
                     break;
             }
