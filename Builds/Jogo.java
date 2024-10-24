@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -22,6 +23,11 @@ public class Jogo extends JFrame {
     private Font numberFont;
     private Clip acertoClip;
     private Clip erroClip;
+    private Clip clip;
+    private Clip fimJogoClip;
+    private boolean musicaTocando = false;
+
+
 
 
     public static void main(String[] args) {
@@ -34,6 +40,40 @@ public class Jogo extends JFrame {
         terminarJogo();
     }
 
+    public List<String[]> obterTop10Placares() {
+        List<String[]> placar = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("placar.txt"))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                placar.add(linha.split(" - "));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Ordena o placar em ordem decrescente
+        Collections.sort(placar, (p1, p2) -> Integer.compare(Integer.parseInt(p2[1]), Integer.parseInt(p1[1])));
+        return placar.stream().collect(Collectors.toList());
+    }
+
+    public void exibirPlacarCompleto() {
+        List<String[]> placarCompleto = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("placar.txt"))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                placarCompleto.add(linha.split(" - "));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String[] columnNames = {"Jogador", "Pontuação"};
+        JTable tabelaCompleta = new JTable(placarCompleto.toArray(new String[0][0]), columnNames);
+        tabelaCompleta.setFillsViewportHeight(true);
+        JScrollPane scrollPane = new JScrollPane(tabelaCompleta);
+        
+        JOptionPane.showMessageDialog(this, scrollPane, "Placar Completo", JOptionPane.INFORMATION_MESSAGE);
+    }
 
     private void carregarSons() {
         try {
@@ -67,15 +107,62 @@ public class Jogo extends JFrame {
 
     public void tocarMusicaFundo() {
         try {
+            if (musicaTocando) {
+                // Para a música se já estiver tocando
+                if (clip.isRunning()) {
+                    clip.stop();
+                }
+                clip.close(); // Fecha o clip antes de reabrir
+            }
+    
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets\\m1.wav"));
-            Clip clip = AudioSystem.getClip();
+            clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.loop(Clip.LOOP_CONTINUOUSLY); // Repetir a música continuamente
             clip.start();
+            musicaTocando = true; // Define que a música está tocando
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public void pararMusicaPrincipal() {
+        if (musicaTocando) {
+            if (clip.isRunning()) {
+                clip.stop();
+            }
+            clip.close();
+            musicaTocando = false; // Define que a música não está mais tocando
+        }
+    }
+
+
+    private void carregarMusicaFimJogo() {
+        try {
+            AudioInputStream fimJogoAudio = AudioSystem.getAudioInputStream(new File("Assets\\end.wav"));
+            fimJogoClip = AudioSystem.getClip();
+            fimJogoClip.open(fimJogoAudio);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void tocarSomFimJogo() {
+        if (fimJogoClip != null) {
+            fimJogoClip.setFramePosition(0); // Volta para o início
+            fimJogoClip.start(); // Inicia a reprodução
+        }
+    }
+
+
+    public void pararSomFimJogo() {
+        if (fimJogoClip != null) {
+            fimJogoClip.setFramePosition(0); // Volta para o início
+            fimJogoClip.stop(); // Inicia a reprodução
+        }
+    }
+
+
 
     public void iniciar() {
         try {
@@ -87,6 +174,7 @@ public class Jogo extends JFrame {
             e.printStackTrace();
         }
 
+        pararSomFimJogo();
         carregarSons(); // Carregar os sons
         jogador = new Jogador();
         telaJogo = new TelaJogo(this);
@@ -95,6 +183,7 @@ public class Jogo extends JFrame {
         setSize(400, 400);
         setVisible(true);
         tocarMusicaFundo();
+        carregarMusicaFimJogo();
     }
 
 
@@ -124,6 +213,8 @@ public class Jogo extends JFrame {
 
     public void terminarJogo() {
         jogoTimer.stop();
+        pararMusicaPrincipal();
+        tocarSomFimJogo();
         telaJogo.exibirTelaFimDeJogo();
     }
 
@@ -211,8 +302,35 @@ public class Jogo extends JFrame {
         private JTextField txtResposta;
         private JLabel lblPontuacao;
         private JLabel lblTempo;
-        private JButton btnJogar;
+        private JButton btnJogar; //MESMO SE ESTIVER DANDO ERRO NÃO TIRA PORQUE SE NÃO PARA DE FUNCIONAR
 
+        public void exibirTabelaPlacar() {
+            List<String[]> placarTop10 = jogo.obterTop10Placares(); // Método para obter os 10 melhores
+            String[] columnNames = {"Colocação", "Jogador", "Pontuação"};
+    
+            // Criar uma lista temporária para incluir a colocação
+            List<String[]> placarComColocacao = new ArrayList<>();
+            for (int i = 0; i < placarTop10.size(); i++) {
+                String[] jogador = placarTop10.get(i);
+                placarComColocacao.add(new String[]{(i + 1) + "°", jogador[0], jogador[1]}); // Adiciona a colocação
+            }
+    
+            JTable tabelaTop10 = new JTable(placarComColocacao.toArray(new String[0][0]), columnNames);
+            tabelaTop10.setFillsViewportHeight(true);
+            JScrollPane scrollPane = new JScrollPane(tabelaTop10);
+            
+            JOptionPane.showOptionDialog(
+                this, 
+                scrollPane, 
+                "Classificação", 
+                JOptionPane.DEFAULT_OPTION, 
+                JOptionPane.PLAIN_MESSAGE, 
+                null, 
+                null, 
+                null
+            );
+        }
+    
         public TelaJogo(Jogo jogo) {
             this.jogo = jogo;
             setLayout(new GridBagLayout());
@@ -290,9 +408,10 @@ public class Jogo extends JFrame {
             btnPlacar.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    jogo.exibirPlacar();
+                    exibirTabelaPlacar(); // Mude aqui para exibirTabelaPlacar
                 }
             });
+
 
             // Define a fonte padrão para todos os componentes
             setFontForAllComponents(this, jogo.customFont);
