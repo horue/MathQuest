@@ -219,6 +219,9 @@ public class Jogo extends JFrame {
     }
 
     public void registrarPontuacao() {
+        if (jogador.getNome().equalsIgnoreCase("nullo")) {
+            return; // Não registra a pontuação se o nome for "nullo"
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("placar.txt", true))) {
             writer.write(jogador.getNome() + " - " + jogador.getPontuacao());
             writer.newLine();
@@ -463,8 +466,13 @@ public class Jogo extends JFrame {
                 nome = JOptionPane.showInputDialog(this, "Seu nome não pode ser vazio e nem conter números! Por favor, digite seu nome novamente:");
             }
             
+
             jogo.jogador.setNome(nome);
             System.out.println("Jogador: " + jogo.jogador.getNome() + " - Pontuação: " + jogo.jogador.getPontuacao());
+
+            if (!nome.equalsIgnoreCase("nullo")) {
+                jogo.registrarPontuacao(); // Salva a pontuação do jogador
+            }        
         
             jogo.registrarPontuacao(); // Salva a pontuação do jogador
         
