@@ -26,6 +26,8 @@ public class Jogo extends JFrame {
     private Clip clip;
     private Clip fimJogoClip;
     private boolean musicaTocando = false;
+    private Clip jogoClip;
+
 
 
 
@@ -40,7 +42,7 @@ public class Jogo extends JFrame {
         terminarJogo();
     }
 
-    public List<String[]> obterTop10Placares() {
+    public List<String[]> obterPlacarComp() {
         List<String[]> placar = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("placar.txt"))) {
             String linha;
@@ -126,7 +128,7 @@ public class Jogo extends JFrame {
         }
     }
 
-    public void pararMusicaPrincipal() {
+    public void pararMusicaFundo() {
         if (musicaTocando) {
             if (clip.isRunning()) {
                 clip.stop();
@@ -139,7 +141,7 @@ public class Jogo extends JFrame {
 
     private void carregarMusicaFimJogo() {
         try {
-            AudioInputStream fimJogoAudio = AudioSystem.getAudioInputStream(new File("Assets\\end.wav"));
+            AudioInputStream fimJogoAudio = AudioSystem.getAudioInputStream(new File("Assets\\GhostAlley.wav"));
             fimJogoClip = AudioSystem.getClip();
             fimJogoClip.open(fimJogoAudio);
         } catch (Exception e) {
@@ -162,6 +164,34 @@ public class Jogo extends JFrame {
         }
     }
 
+
+    private void carregarMusicaJogo() {
+        try {
+            AudioInputStream jogoAudio = AudioSystem.getAudioInputStream(new File("Assets\\Ivegotyou.wav"));
+            jogoClip = AudioSystem.getClip();
+            jogoClip.open(jogoAudio);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void tocarMusicaJogo() {
+        carregarMusicaJogo(); // Parar qualquer outra música antes
+        if (jogoClip != null) {
+            jogoClip.setFramePosition(0);
+            jogoClip.loop(Clip.LOOP_CONTINUOUSLY);
+            jogoClip.start();
+        }
+    }
+
+    public void pararMusicaJogo() {
+        if (jogoClip != null) {
+            jogoClip.setFramePosition(0); // Volta para o início
+            jogoClip.stop(); // Inicia a reprodução
+        }
+    }
+
+    
 
 
     public void iniciar() {
@@ -213,7 +243,8 @@ public class Jogo extends JFrame {
 
     public void terminarJogo() {
         jogoTimer.stop();
-        pararMusicaPrincipal();
+        pararMusicaFundo();
+        pararMusicaJogo();
         tocarSomFimJogo();
         telaJogo.exibirTelaFimDeJogo();
     }
@@ -308,7 +339,7 @@ public class Jogo extends JFrame {
         private JButton btnJogar; //MESMO SE ESTIVER DANDO ERRO NÃO TIRA PORQUE SE NÃO PARA DE FUNCIONAR
 
         public void exibirTabelaPlacar() {
-            List<String[]> placarTop10 = jogo.obterTop10Placares(); // Método para obter os 10 melhores
+            List<String[]> placarTop10 = jogo.obterPlacarComp(); //
             String[] columnNames = {"Colocação", "Jogador", "Pontuação"};
     
             // Criar uma lista temporária para incluir a colocação
@@ -335,13 +366,37 @@ public class Jogo extends JFrame {
         }
     
         public TelaJogo(Jogo jogo) {
+            setTitle("Math Quest");
+            ImageIcon img = new ImageIcon("Assets\\Images\\iconbig.png");
+            setIconImage(img.getImage());
             this.jogo = jogo;
             setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(10, 10, 10, 10); // Espaçamento entre os componentes
+            gbc.insets = new Insets(10, 10, 10, 10); // Espaçamento entre os componentes (NÃO ALTERAR)
+
+
+            ImageIcon originalIcon = new ImageIcon("Assets\\Images\\mathquestlogo2.png");
+
+            // Redimensiona a imagem (NÃO MUDAR)
+            Image originalImage = originalIcon.getImage();
+            Image scaledImage = originalImage.getScaledInstance(originalIcon.getIconWidth() / 3, originalIcon.getIconHeight() / 3, Image.SCALE_SMOOTH);
+            
+
+            JLabel logo = new JLabel(new ImageIcon(scaledImage));
+            
+            GridBagConstraints gbcLogo = new GridBagConstraints();
+            gbcLogo.insets = new Insets(10, 10, 10, 10); 
+            gbcLogo.gridx = 0;
+            gbcLogo.gridy = 0; // Ajuste conforme necessário
+            gbcLogo.gridwidth = 2;
+            gbcLogo.anchor = GridBagConstraints.CENTER;
+            
+            add(logo, gbcLogo);
+        
+            JLabel finalLogo = logo;
 
             lblConta = new JLabel();
-            lblConta.setFont(jogo.numberFont.deriveFont(40f)); // Aumenta o tamanho da fonte da conta
+            lblConta.setFont(jogo.numberFont.deriveFont(40f));
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.gridwidth = 2;
@@ -349,6 +404,7 @@ public class Jogo extends JFrame {
             add(lblConta, gbc);
 
             txtResposta = new JTextField(10);
+            txtResposta.setVisible(false); // Inicialmente oculto
             gbc.gridx = 0;
             gbc.gridy = 1;
             gbc.gridwidth = 2;
@@ -390,10 +446,20 @@ public class Jogo extends JFrame {
                         jogo.iniciarJogo(); // Inicia o jogo
                         btnJogar.setText("Parar"); // Muda o texto do botão para "Parar"
                         jogando = true;
+                        pararMusicaFundo();
+                        tocarMusicaJogo();
+                        txtResposta.setVisible(true); // Mostrar a barra de input
+                        lblPontuacao.setVisible(true); // Mostrar a pontuação
+                        lblTempo.setVisible(true); // Mostrar o tempo
+                        finalLogo.setVisible(false); // Ocultar a logo
                     } else {
                         jogo.pararJogo(); // Para o jogo
                         btnJogar.setText("Jogar"); // Muda o texto do botão de volta para "Jogar"
                         jogando = false;
+                        txtResposta.setVisible(false); // Ocultar a barra de input
+                        lblPontuacao.setVisible(false); // Ocultar a pontuação
+                        lblTempo.setVisible(false); // Ocultar o tempo
+                        finalLogo.setVisible(true); // Mostrar a logo
                     }
                     btnJogar.setEnabled(true); // Reativa o botão
                 }
@@ -416,7 +482,7 @@ public class Jogo extends JFrame {
             });
 
 
-            // Define a fonte padrão para todos os componentes
+            // Muda a fonte (NÃO ALTERAR)
             setFontForAllComponents(this, jogo.customFont);
 
             txtResposta.addActionListener(new ActionListener() {
@@ -471,10 +537,10 @@ public class Jogo extends JFrame {
             System.out.println("Jogador: " + jogo.jogador.getNome() + " - Pontuação: " + jogo.jogador.getPontuacao());
 
             if (!nome.equalsIgnoreCase("nullo")) {
-                jogo.registrarPontuacao(); // Salva a pontuação do jogador
+                jogo.registrarPontuacao(); // Salva a pontuação do jogador no txt se o nome for difernte de nullo (Só para teste e não ficar aumentando o txt)
             }        
         
-            jogo.registrarPontuacao(); // Salva a pontuação do jogador
+            jogo.registrarPontuacao(); // Salva a pontuação do jogador no txt
         
             int option = JOptionPane.showConfirmDialog(this, "Deseja jogar novamente?", "Fim de Jogo", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
