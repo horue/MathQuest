@@ -20,11 +20,45 @@ public class Jogo extends JFrame {
     private int tempoRestante;
     private Font customFont;
     private Font numberFont;
+    private Clip acertoClip;
+    private Clip erroClip;
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Jogo().iniciar());
     }
 
+
+
+    private void carregarSons() {
+        try {
+            AudioInputStream acertoAudio = AudioSystem.getAudioInputStream(new File("Assets\\Powerup.wav"));
+            acertoClip = AudioSystem.getClip();
+            acertoClip.open(acertoAudio);
+    
+            AudioInputStream erroAudio = AudioSystem.getAudioInputStream(new File("Assets\\Hurt.wav"));
+            erroClip = AudioSystem.getClip();
+            erroClip.open(erroAudio);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void tocarSom(Clip clip) {
+        if (clip != null) {
+            clip.stop();
+            clip.setFramePosition(0); // Rewind to the beginning
+            clip.start();
+        }
+    }
+    
+    public void tocarSomAcerto() {
+        tocarSom(acertoClip);
+    }
+    
+    public void tocarSomErro() {
+        tocarSom(erroClip);
+    }
 
     public void tocarMusicaFundo() {
         try {
@@ -48,6 +82,7 @@ public class Jogo extends JFrame {
             e.printStackTrace();
         }
 
+        carregarSons(); // Carregar os sons
         jogador = new Jogador();
         telaJogo = new TelaJogo(this);
         setContentPane(telaJogo);
@@ -137,8 +172,10 @@ public class Jogo extends JFrame {
             if (conta.verificarResposta(resposta)) {
                 incrementarPontuacao(conta);
                 tempoRestante += 4; // Adiciona tempo se acertar (PODE SER ALTERADO)
+                tocarSomAcerto(); // Toca som de acerto
             } else {
                 tempoRestante -= 2; // Reduz o tempo se errar (PODE SER ALTERADO)
+                tocarSomErro(); // Toca som de erro
             }
         }
 
@@ -246,7 +283,7 @@ public class Jogo extends JFrame {
             txtResposta.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    int resposta = Integer.parseInt(txtResposta.getText());
+                    int resposta = txtResposta.getText().trim().isEmpty() ? 0 : Integer.parseInt(txtResposta.getText().trim());
                     jogo.jogador.responder(resposta, jogo.contaAtual);
                     jogo.gerarNovaConta();
                     atualizarTela();
@@ -286,8 +323,8 @@ public class Jogo extends JFrame {
             String nome = JOptionPane.showInputDialog(this, "Fim de Jogo! Digite seu nome:");
             
             // Verifica se o nome é nulo ou vazio
-            while (nome == null || nome.trim().isEmpty()) {
-                nome = JOptionPane.showInputDialog(this, "Nome não pode ser vazio! Por favor, digite seu nome:");
+            while (nome == null || nome.trim().isEmpty() || !nome.matches("[a-zA-Z ]+")) {
+                nome = JOptionPane.showInputDialog(this, "Seu nome não pode ser vazio e nem conter números! Por favor, digite seu nome novamente:");
             }
             
             jogo.jogador.setNome(nome);
