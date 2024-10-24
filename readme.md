@@ -1,5 +1,6 @@
 <img src="Assets\Images\mathquestlogo2.png" alt="project logo" width="300">
 
+[Read in Portuguese](readme-pt.md)
 
 ## Overview
 
