@@ -28,6 +28,11 @@ public class Jogo extends JFrame {
         SwingUtilities.invokeLater(() -> new Jogo().iniciar());
     }
 
+    public void pararJogo() {
+        tempoRestante = 0;
+        telaJogo.atualizarTempo(tempoRestante);
+        terminarJogo();
+    }
 
 
     private void carregarSons() {
@@ -206,6 +211,7 @@ public class Jogo extends JFrame {
         private JTextField txtResposta;
         private JLabel lblPontuacao;
         private JLabel lblTempo;
+        private JButton btnJogar;
 
         public TelaJogo(Jogo jogo) {
             this.jogo = jogo;
@@ -244,6 +250,7 @@ public class Jogo extends JFrame {
             add(lblTempo, gbc);
 
             // Botão para iniciar o jogo
+            btnJogar = new JButton("Jogar");
             JButton btnJogar = new JButton("Jogar");
             btnJogar.setFont(jogo.customFont);
             gbc.gridx = 0;
@@ -254,10 +261,20 @@ public class Jogo extends JFrame {
 
             // Ação do botão para iniciar o jogo
             btnJogar.addActionListener(new ActionListener() {
+                private boolean jogando = false; // Variável para rastrear o estado do jogo
+            
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    jogo.iniciarJogo(); // Inicia o jogo
-                    btnJogar.setEnabled(false); // Desabilita o botão após iniciar o jogo
+                    if (!jogando) {
+                        jogo.iniciarJogo(); // Inicia o jogo
+                        btnJogar.setText("Parar"); // Muda o texto do botão para "Parar"
+                        jogando = true;
+                    } else {
+                        jogo.pararJogo(); // Para o jogo
+                        btnJogar.setText("Jogar"); // Muda o texto do botão de volta para "Jogar"
+                        jogando = false;
+                    }
+                    btnJogar.setEnabled(true); // Reativa o botão
                 }
             });
 
@@ -323,7 +340,7 @@ public class Jogo extends JFrame {
             String nome = JOptionPane.showInputDialog(this, "Fim de Jogo! Digite seu nome:");
             
             // Verifica se o nome é nulo ou vazio
-            while (nome == null || nome.trim().isEmpty() || !nome.matches("[a-zA-Z ]+")) {
+            while (nome == null || nome.trim().isEmpty() || !nome.matches("[a-zA-ZÀ-ÖØ-ÿ\\s]+")) {
                 nome = JOptionPane.showInputDialog(this, "Seu nome não pode ser vazio e nem conter números! Por favor, digite seu nome novamente:");
             }
             
