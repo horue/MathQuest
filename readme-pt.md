@@ -1,6 +1,8 @@
-# Math Quest
 
 <img src="Assets\Images\mathquestlogo2.png" alt="logo do projeto" width="300">
+
+[Leia em Inglês](readme.md)
+
 
 ## Visão Geral
 
