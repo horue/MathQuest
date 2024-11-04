@@ -539,9 +539,7 @@ public class Jogo extends JFrame {
             if (!nome.equalsIgnoreCase("nullo")) {
                 jogo.registrarPontuacao(); // Salva a pontuação do jogador no txt se o nome for difernte de nullo (Só para teste e não ficar aumentando o txt)
             }        
-        
-            jogo.registrarPontuacao(); // Salva a pontuação do jogador no txt
-        
+                
             int option = JOptionPane.showConfirmDialog(this, "Deseja jogar novamente?", "Fim de Jogo", JOptionPane.YES_NO_OPTION);
             if (option == JOptionPane.YES_OPTION) {
                 jogo.iniciar();
