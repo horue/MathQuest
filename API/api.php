@@ -1,4 +1,10 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET");
+header("Access-Control-Allow-Headers: Content-Type");
+
+
+
 $file = '../placar_g.txt'; // Caminho para o placar global
 
 if (file_exists($file)) {
