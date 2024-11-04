@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: text/plain");
 
 $file = '../placar_g.txt'; // Caminho para o placar global
 
@@ -11,13 +11,12 @@ if (file_exists($file)) {
     $placar = [];
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['nome']) && isset($_POST['pontuacao'])) {
         $nome = trim($_POST['nome']);
         $pontuacao = intval($_POST['pontuacao']);
 
-
+        // Valida a entrada
         if (!empty($nome) && $pontuacao >= 0) {
             $placar[] = "$nome - $pontuacao";
             file_put_contents($file, implode("\n", $placar));
@@ -34,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-
+// Enviar o placar como texto simples
 foreach ($placar as $entry) {
-    echo $entry . "\n";
+    echo $entry . "\n"; 
 }
 ?>
