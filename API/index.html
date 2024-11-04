@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placar do Jogo</title>
+    <script>
+        async function atualizarPlacar() {
+            const response = await fetch('/api.php');
+            const placar = await response.json();
+            const placarDiv = document.getElementById('placarLocal');
+            placarDiv.innerHTML = '<h2>Placar Global:</h2>';
+            placar.forEach(entry => {
+                placarDiv.innerHTML += `<p>${entry}</p>`;
+            });
+        }
+
+        async function enviarPlacar() {
+            const nome = document.getElementById('nome').value;
+            const pontuacao = document.getElementById('pontuacao').value;
+            await fetch('/api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `nome=${encodeURIComponent(nome)}&pontuacao=${encodeURIComponent(pontuacao)}`
+            });
+            atualizarPlacar();
+        }
+    </script>
+</head>
+<body>
+    <h1>Placar do Jogo</h1>
+    <div id="placarLocal"></div>
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="number" id="pontuacao" placeholder="Pontuação" required>
+    <button onclick="enviarPlacar()">Enviar Placar</button>
+    <button onclick="atualizarPlacar()">Atualizar Placar</button>
+</body>
+</html>
