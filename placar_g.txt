@@ -1,0 +1,79 @@
+null - 0
+null - 0
+Jorge - 12
+Vitória - 35
+Jorge - 13
+0 - 0
+0 - 1
+Jorge2 - 0
+ - 3
+null - 9
+0 - 25
+Jorge - 0
+Jorge - 21
+Jorge - 3
+Jorge - 3
+AAAAAAAAA - 11
+Alice - 7
+Alice - 0
+195 - 8
+50 - 27
+Alice - 513
+ - 0
+ - 4
+ - 4
+5 - 7
+AAAAAAAAAAAAAAA - 3
+Teste Som - 3
+0 - 0
+Teste Regex - 0
+Teste Maior - 0
+Teste Resposta Vazia - 1
+Teste Parar - 0
+Teste - 9
+Teste ã - 1
+Teste loop - 0
+Teste Placar - 8
+Teste Música - 1
+TesteUm - 0
+TesteFimDeJogo - 0
+TesteMúsica - 0
+Teste - 0
+At - 0
+a - 0
+teste - 0
+Teste - 0
+TesteParar - 0
+At - 0
+at - 0
+athb - 0
+gefsdbn - 0
+ffb - 0
+huj - 0
+Teste - 9
+guk - 0
+hgfggfh - 14
+gghbcfgd - 0
+hgsdtred - 0
+null - 0
+nullo - 0
+Jorge - 4
+Jorge - 4
+Testando - 0
+Testando - 0
+Maria Alice - 5
+Maria Alice - 5
+Jorge - 14
+Jorge - 14
+JorgeTesteTQ - 24
+JorgeTesteTQ - 24
+tedrw - 28
+tedrw - 28
+kk - 0
+kk - 0
+jirger - 0
+jirger - 0
+l - 0
+l - 0
+Jorge - 0
+Jorge - 0
