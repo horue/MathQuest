@@ -1,21 +1,35 @@
 <?php
-$file = 'placar_g.txt';
+$file = '../placar_g.txt'; // Caminho para o placar global
 
 if (file_exists($file)) {
-    $placar = file($file, FILE_IGNORE_NEW_LINES);
+    $placar = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 } else {
     $placar = [];
 }
 
-// Atualiza o placar global se tiver coisa nova
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = $_POST['nome'];
-    $pontuacao = $_POST['pontuacao'];
-    // Adiciona nova pontuação ao placar
-    $placar[] = "$nome - $pontuacao";
-    file_put_contents($file, implode("\n", $placar));
+    if (isset($_POST['nome']) && isset($_POST['pontuacao'])) {
+        $nome = trim($_POST['nome']);
+        $pontuacao = intval($_POST['pontuacao']);
+
+        // Valida a entrada
+        if (!empty($nome) && $pontuacao >= 0) {
+            $placar[] = "$nome - $pontuacao";
+            file_put_contents($file, implode("\n", $placar));
+            echo "Pontuação adicionada com sucesso!";
+        } else {
+            http_response_code(400); 
+            echo "Nome ou pontuação inválidos.";
+            exit();
+        }
+    } else {
+        http_response_code(400);
+        echo "Parâmetros nome e pontuação são obrigatórios.";
+        exit();
+    }
 }
 
-// JSON
-header('Content-Type: application/json');
-echo json_encode($placar);
+foreach ($placar as $entry) {
+    echo $entry . "<br>"; 
+}
+?>
