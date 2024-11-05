@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -210,7 +212,8 @@ public class Jogo extends JFrame {
         telaJogo = new TelaJogo(this);
         setContentPane(telaJogo);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 400);
+        setSize(750, 400);
+        setLocationRelativeTo(null);
         setVisible(true);
         tocarMusicaFundo();
         carregarMusicaFimJogo();
@@ -337,6 +340,8 @@ public class Jogo extends JFrame {
         private JLabel lblPontuacao;
         private JLabel lblTempo;
         private JButton btnJogar; //MESMO SE ESTIVER DANDO ERRO NÃO TIRA PORQUE SE NÃO PARA DE FUNCIONAR
+        private Color corBtn = new Color(248, 241, 196);
+        private Color corTrac = new Color(122, 0, 14);
 
         public void exibirTabelaPlacar() {
             List<String[]> placarTop10 = jogo.obterPlacarComp(); //
@@ -397,6 +402,7 @@ public class Jogo extends JFrame {
 
             lblConta = new JLabel();
             lblConta.setFont(jogo.numberFont.deriveFont(40f));
+            lblConta.setForeground(Color.black);
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.gridwidth = 2;
@@ -413,6 +419,7 @@ public class Jogo extends JFrame {
 
             lblPontuacao = new JLabel();
             lblPontuacao.setFont(jogo.customFont.deriveFont(14f));
+            lblPontuacao.setForeground(Color.black);
             gbc.gridx = 0;
             gbc.gridy = 2;
             gbc.gridwidth = 1;
@@ -421,6 +428,7 @@ public class Jogo extends JFrame {
 
             lblTempo = new JLabel();
             lblTempo.setFont(jogo.customFont.deriveFont(14f));
+            lblTempo.setForeground(Color.black);
             gbc.gridx = 1;
             gbc.gridy = 2;
             gbc.anchor = GridBagConstraints.WEST;
@@ -430,6 +438,11 @@ public class Jogo extends JFrame {
             btnJogar = new JButton("Jogar");
             JButton btnJogar = new JButton("Jogar");
             btnJogar.setFont(jogo.customFont);
+            btnJogar.setFocusPainted(false);
+            btnJogar.setBackground(corBtn);
+            btnJogar.setBorder(new LineBorder(corTrac, 2));
+            btnJogar.setForeground(Color.black);
+            btnJogar.setPreferredSize(new Dimension(100, 35));
             gbc.gridx = 0;
             gbc.gridy = 3;
             gbc.gridwidth = 1;
@@ -468,6 +481,12 @@ public class Jogo extends JFrame {
             // Botão para mostrar o placar
             JButton btnPlacar = new JButton("Ver Placar");
             btnPlacar.setFont(jogo.customFont);
+            btnPlacar.setFocusPainted(false);
+            btnPlacar.setFocusPainted(false);
+            btnPlacar.setBackground(corBtn);
+            btnPlacar.setBorder(new LineBorder(corTrac, 2));
+            btnPlacar.setForeground(Color.black);
+            btnPlacar.setPreferredSize(new Dimension(100, 35));
             gbc.gridx = 1;
             gbc.gridy = 3;
             gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -510,22 +529,24 @@ public class Jogo extends JFrame {
             lblConta.setText(jogo.contaAtual.toString());
             lblConta.setFont(numberFont.deriveFont(30f));
             lblPontuacao.setText("Pontuação: " + jogo.jogador.getPontuacao());
+            lblPontuacao.setPreferredSize(new Dimension(300,20));
+
         }
 
         public void atualizarTempo(int tempo) {
-            lblTempo.setText("Tempo Restante: " + tempo + "s");
-
-            if (tempo < 10) {
-                lblTempo.setForeground(Color.RED);
-                lblTempo.setFont(jogo.customFont.deriveFont(Font.PLAIN, 14f));
-            } else {
-                lblTempo.setForeground(Color.BLACK);
-                lblTempo.setFont(jogo.customFont.deriveFont(Font.PLAIN, 14f));
-            }
+            // Define a cor do número com base no valor de 'tempo'
+            String color = (tempo <= 10) ? "red" : "black"; 
+        
+            // Atualiza o texto do JLabel usando HTML
+            lblTempo.setText("<html>Tempo Restante: <span style='color:" + color + "'>" + tempo + "s</html>");
+        
+            // Mantém a fonte atualizada
+            lblTempo.setFont(jogo.customFont.deriveFont(Font.PLAIN, 14f));
+            lblTempo.setPreferredSize(new Dimension(300,20));
         }
 
         public void exibirTelaFimDeJogo() {
-            String nome = JOptionPane.showInputDialog(this, "Fim de Jogo! Digite seu nome:");
+            String nome = JOptionPane.showInputDialog(this, "Fim de Jogo! Digite seu nome:", "Fim de Jogo", 0);
             
             // Verifica se o nome é nulo ou vazio
             while (nome == null || nome.trim().isEmpty() || !nome.matches("[a-zA-ZÀ-ÖØ-ÿ\\s]+")) {
