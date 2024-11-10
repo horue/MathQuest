@@ -15,6 +15,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.Normalizer;
+
 public class Jogo extends JFrame {
     private Jogador jogador;
     private TelaJogo telaJogo;
@@ -29,6 +35,8 @@ public class Jogo extends JFrame {
     private Clip fimJogoClip;
     private boolean musicaTocando = false;
     private Clip jogoClip;
+    private static final String DATABASE_URL = "https://mathquest-21f30-default-rtdb.firebaseio.com/";
+
 
 
 
@@ -78,6 +86,76 @@ public class Jogo extends JFrame {
         
         JOptionPane.showMessageDialog(this, scrollPane, "Placar Completo", JOptionPane.INFORMATION_MESSAGE);
     }
+
+    public List<String[]> obterPlacarCompFB() {
+        List<String[]> placar = new ArrayList<>();
+        
+        try {
+            String path = "global.json";
+            URI uri = new URI(DATABASE_URL + path);
+            URL url = uri.toURL();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Ler a resposta JSON do Firebase
+                try (InputStreamReader reader = new InputStreamReader(connection.getInputStream());
+                     BufferedReader bufferedReader = new BufferedReader(reader)) {
+                    
+                    StringBuilder jsonResponse = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        jsonResponse.append(line);
+                    }
+
+                    String jsonData = jsonResponse.toString();
+                    if (jsonData.equals("null")) {
+                        return placar; 
+                    }
+
+
+                    jsonData = jsonData.substring(1, jsonData.length() - 1); 
+                    String[] entries = jsonData.split("},");  // Separa os objetos dos jogadores
+                    
+                    for (String entry : entries) {
+                        // Garantir que as chaves e valores estão formatados corretamente
+                        entry = entry.replace("{", "").replace("}", "").trim();
+
+                        // Dividir cada entrada por vírgula
+                        String[] parts = entry.split(",");
+
+                        String nome = "";
+                        int pontuacao = 0;
+                        
+                        // Extrair corretamente os valores de "nome" e "pontuacao"
+                        for (String part : parts) {
+                            if (part.contains("\"nome\"")) {
+                                nome = part.split(":")[2].replace("\"", "").trim(); 
+                            }
+                            if (part.contains("\"pontuacao\"")) {
+                                pontuacao = Integer.parseInt(part.split(":")[1].trim());
+                            }
+                        }
+
+                        // Adicionar o jogador ao placar
+                        placar.add(new String[]{nome, String.valueOf(pontuacao)});
+                    }
+                }
+            } else {
+                System.out.println("Erro ao obter placar: " + responseCode);
+            }
+            connection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //faz a ordem decrescente
+        placar.sort((p1, p2) -> Integer.compare(Integer.parseInt(p2[1]), Integer.parseInt(p1[1])));
+        return placar.stream().collect(Collectors.toList());
+    }
+
 
     private void carregarSons() {
         try {
@@ -259,9 +337,50 @@ public class Jogo extends JFrame {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("placar.txt", true))) {
             writer.write(jogador.getNome() + " - " + jogador.getPontuacao());
             writer.newLine();
+            try {
+                String nomeLimpo = Normalizer.normalize(jogador.getNome(), Normalizer.Form.NFD);
+                nomeLimpo = nomeLimpo.replaceAll("[^\\p{ASCII}]", "");
+                enviarParaFirebase(nomeLimpo, jogador.getPontuacao());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                System.out.println("Erro de URI: " + e.getMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Erro de IO: " + e.getMessage());
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            e.printStackTrace();
         }
+    }
+
+   private void enviarParaFirebase(String nome, int pontuacao) throws IOException, URISyntaxException {
+        String path = "global.json"; //nome da parte que vai ser usada na firebase
+        URI uri = new URI(DATABASE_URL + path);
+        URL url = uri.toURL();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        connection.setDoOutput(true);
+
+        String jsonInputString = "{\"nome\": \"" + nome + "\", \"pontuacao\": " + pontuacao + "}";
+
+
+
+        try (DataOutputStream dos = new DataOutputStream(connection.getOutputStream())) {
+            dos.writeBytes(jsonInputString);
+            dos.flush();
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Pontuação registrada com sucesso!");
+        } else {
+            System.out.println("Erro ao registrar pontuação: " + responseCode);
+        }
+
+        connection.disconnect();
     }
 
     public void exibirPlacar() {
@@ -367,6 +486,78 @@ public class Jogo extends JFrame {
                 null, 
                 null, 
                 null
+            );
+        }
+
+
+        public void exibirTabelaPlacarFB() {
+            List<String[]> placarCompleto = obterPlacarCompFB();
+
+            String[] columnNames = {"Colocação", "Jogador", "Pontuação"};
+    
+            List<String[]> placarComColocacao = new ArrayList<>();
+            for (int i = 0; i < placarCompleto.size(); i++) {
+                String[] jogador = placarCompleto.get(i);
+                placarComColocacao.add(new String[]{(i + 1) + "°", jogador[0], jogador[1]});
+            }
+    
+            JTable tabelaCompleta = new JTable(placarComColocacao.toArray(new String[0][0]), columnNames);
+            tabelaCompleta.setFillsViewportHeight(true);
+            JScrollPane scrollPane = new JScrollPane(tabelaCompleta);
+    
+            JOptionPane.showOptionDialog(
+                    null, 
+                    scrollPane,
+                    "Classificação Completa",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    null,
+                    null
+            );
+
+        }
+
+        public void exibirPlacarComAbas() {
+            JTabbedPane tabbedPane = new JTabbedPane();
+    
+            List<String[]> placarLocal = obterPlacarComp(); // Do arquivo .txt
+            List<String[]> placarGlobal = obterPlacarCompFB(); // Da fd
+    
+            String[] columnNames = {"Colocação", "Jogador", "Pontuação"};
+    
+            // Criando a tabela para o placar local
+            List<String[]> placarLocalComColocacao = new ArrayList<>();
+            for (int i = 0; i < placarLocal.size(); i++) {
+                String[] jogador = placarLocal.get(i);
+                placarLocalComColocacao.add(new String[]{(i + 1) + "°", jogador[0].toUpperCase(), jogador[1]});
+            }
+            JTable tabelaLocal = new JTable(placarLocalComColocacao.toArray(new String[0][0]), columnNames);
+            tabelaLocal.setFillsViewportHeight(true);
+            JScrollPane scrollLocal = new JScrollPane(tabelaLocal);
+    
+            // Lista FB
+            List<String[]> placarGlobalComColocacao = new ArrayList<>();
+            for (int i = 0; i < placarGlobal.size(); i++) {
+                String[] jogador = placarGlobal.get(i);
+                placarGlobalComColocacao.add(new String[]{(i + 1) + "°", jogador[0].toUpperCase(), jogador[1]});
+            }
+            JTable tabelaGlobal = new JTable(placarGlobalComColocacao.toArray(new String[0][0]), columnNames);
+            tabelaGlobal.setFillsViewportHeight(true);
+            JScrollPane scrollGlobal = new JScrollPane(tabelaGlobal);
+    
+            tabbedPane.addTab("Placar Local", scrollLocal);
+            tabbedPane.addTab("Placar Global", scrollGlobal);
+    
+            JOptionPane.showOptionDialog(
+                    null,
+                    tabbedPane,
+                    "Classificação",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    null,
+                    null
             );
         }
     
@@ -496,7 +687,7 @@ public class Jogo extends JFrame {
             btnPlacar.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    exibirTabelaPlacar(); // Mude aqui para exibirTabelaPlacar
+                    exibirPlacarComAbas(); // Mude aqui para exibirTabelaPlacar
                 }
             });
 
@@ -581,8 +772,8 @@ public class Jogo extends JFrame {
 
         public void gerarConta() {
             Random random = new Random();
-            numero1 = random.nextInt(19) + 1; 
-            numero2 = random.nextInt(19) + 1; // Gera núemro entre 1 e 19
+            numero1 = random.nextInt(9) + 1; 
+            numero2 = random.nextInt(9) + 1; // Gera núemro entre 1 e 19
         
             char[] operadores = {'+', '-', 'x', '÷'};
             operador = operadores[random.nextInt(4)];
