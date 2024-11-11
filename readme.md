@@ -15,7 +15,7 @@
     -   The player’s score and remaining time are displayed and updated in real-time.
 2.  **Leaderboard:**
     
-    -   The game tracks player scores and maintains a leaderboard stored in a file (`placar.txt`).
+    -   The game tracks player scores and maintains a leaderboard stored in a file (`placar.txt`) and a global leaderboard hosted on Firebase.
     -   Players can view the top scores via the "View Score" button.
 3.  **Sounds and Music:**
     

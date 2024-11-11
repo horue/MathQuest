@@ -17,7 +17,7 @@
     -   A pontuação e o tempo restante do jogador são exibidos e atualizados em tempo real.
 2.  **Placar:**
     
-    -   O jogo rastreia as pontuações dos jogadores e mantém um placar armazenado em um arquivo (`placar.txt`).
+    -   O jogo rastreia as pontuações dos jogadores e mantém um placar armazenado em um arquivo (`placar.txt`) e um placar global armazenado na Firebase.
     -   Os jogadores podem visualizar as melhores pontuações através do botão "Ver Pontuação".
 3.  **Sons e Música:**
     
